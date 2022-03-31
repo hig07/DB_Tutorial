@@ -1,0 +1,42 @@
+--CREATE USER nowon IDENTIFIED BY 1234;
+--g 클라우드 버전에서는 유저 생성시 common__user__prefix c##
+CREATE USER c##test02 IDENTIFIED BY 1234;
+--c##없이 생성가능
+ALTER SESSION SET "_ORACLE_SCRIPT"=true;
+create user nowon IDENTIFIED BY 1234;
+--session OR connect 가능
+--나열식으로 권한 부여 가능
+GRANT connect, resource to nowon;
+grant unlimited tablespace to nowon;
+--계정 삭제
+drop user c##test;
+
+--privilege를 부여받은 권한 혹은 롤을 GRANTEE 라고 한다
+--privilege(특권) : 부여받은 시스템 권한
+
+SELECT * FROM DBA_SYS_PRIVS 
+WHERE GRANTEE='CONNECT';
+-----------------------------------------------------------
+--alter table "NOWON"."MEMBER" drop column "ADDR" 열 삭제
+--DDL 주요 언어
+--** create, drop, alter **
+
+--DML
+insert into member(no, email, name, password, created_date)
+VALUES(1, 'test01@test.com', '이름', '1234', SYSDATE);
+
+
+insert into member --모든 column 적용시 생략 가능, 순서는 지켜야 한다
+VALUES(2, 'test02@test.com', '이름', '1234', SYSDATE);
+
+select * from member;
+select email, name from member;
+--DML 처리된 데이터는 확정해야 정확히 반영된다.
+update member
+set password='2222'
+where no=2;  --조건문에 보통 기본키 기준 조건을 넣는다
+
+delete member
+where no=3;
+
+select * from member;
