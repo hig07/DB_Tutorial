@@ -1,0 +1,134 @@
+select * from employees;
+select count(*) from employees;
+desc employees;
+select employee_id as 사원번호, first_name 이름 
+from employees where department_id=90;
+--컬럼명을 별칭으로 바꿀 수 있다, as(알리아스)는 생략 가능, select 컬럼 from 테이블명 where 조건
+
+select e1.email, e2.email, '안녕하세요', 90 from employees e1, employees e2;
+--join 되어 107 * 107개의 정보가 나온다
+
+select employee_id, email, department_id from employees;
+select distinct department_id from employees;  --중복 제거는 distinct
+select distinct job_id, department_id from employees;
+select first_name || ' ' || last_name as fullname from employees; --한칸 띄어서 컬럼을 붙임
+
+--산술 연산자(null과 산술 연산자는 결과가 null)
+select first_name, salary, salary+commission_pct*salary from employees;
+--null 처리 nvl(대상, 대체값) 함수
+select first_name, salary 기본급, NVL(commission_pct,0)*salary 보너스, salary+NVL(commission_pct,0)*salary 총금액 from employees;
+--모두 출력하는 방법 where 1=1, employee_id>0 등
+SELECT * FROM employees where department_id=30;
+SELECT * FROM employees where salary>10000;
+--문자열 검색시 ''로 묶어서 확인
+SELECT * FROM employees 
+where last_name = 'King' or first_name='Steven'; --조건문은 대소문자 구분한다
+SELECT * FROM employees 
+where last_name = 'King' and first_name='Steven';
+
+SELECT email, hire_date FROM employees;
+SELECT email, hire_date FROM employees
+where hire_date='03-06-17'; --날짜 검색은 '03/06/17', '03-06-17' 가능
+
+--조건 연산자
+-- = 같은 조건 검색
+-- !=, <> 같지 않은 조건 검색
+-- >, <, >=, <=
+--null value 조건 검색시 is null, is not null
+select email, manager_id from employees
+where manager_id is null;
+--결과에 대한 부정은 where 앞에 not -> 위아래 값 같음
+select email, manager_id from employees
+where not manager_id is not null;
+SELECT email, hire_date FROM employees
+where hire_date>'08-01-01';
+
+--급여가 10000~20000
+select email, salary from employees
+where salary >= 10000 and salary <= 17000
+order by salary; --정렬은 무조건 맨 마지막에
+--위 아래 결과 같다 BETWEEN A and B 중요
+select email, salary from employees
+where salary BETWEEN 10000 and 17000
+order by salary; --정렬은 무조건 맨 마지막에 내림차순 : desc 오름 : asc
+
+--부서번호 50, 70 부서의 명단
+select email, department_id from employees
+where department_id=10 or department_id=70;
+--위 아래 결과 같다 
+select email, department_id from employees
+where department_id IN (10, 70);
+
+select employee_id, last_name from employees
+where last_name='King';
+
+select employee_id, last_name from employees
+where last_name like 'Ki%'; --ki가 포함된 성
+select employee_id, last_name from employees
+where last_name like '%g'; --g로 끝나는 모든 글자
+select employee_id, last_name from employees
+where last_name like '%ng%'; --ng가 포함된 모든 글자
+select employee_id, last_name from employees
+where last_name like 'K____'; --K부터 _ 개수만큼 길이의 성
+
+--1. employees 테이블을 사용하여 80번 부서에서 salary가 20000 이상인 사람의 email, salary, department_id를 출력
+select email, salary, department_id from employees
+where department_id=80 and salary>=10000;
+--2. employees 테이블을 사용하여 80번 부서에서 salary가 7000이상 8000미만인 사람의 email, salary, department_id를 출력
+select email, salary, department_id from employees
+where department_id=80 and salary BETWEEN 7000 AND 8000;
+--3. employees 테이블을 사용하여 80번 부서에서 salary가 7000보다 작거나 10000이상인 사람의 email, salary, department_id를 출력
+select email, salary, department_id from employees
+where department_id=80 and (salary<7000 or salary>=10000)
+order by salary;
+
+--sum, avg는 단일 행이므로 email같은 복합 다중 행과 같이 쓸 수 없다.
+select sum(salary), AVG(salary) from employees; 
+
+--select email, salary from employees
+--where salary>AVG(salary); 불가능
+select email, salary from employees
+where salary>(select AVG(salary) from employees); --가능
+
+SELECT email from employees
+where department_id=10
+union  --합집합
+SELECT email from employees
+where department_id=70;
+
+SELECT salary from employees
+where department_id=90
+union all  --합집합 : 중복데이터 모두
+SELECT salary from employees
+where department_id=70;
+
+SELECT salary from employees
+where department_id=80
+intersect  --교집합 : 정렬됨
+SELECT salary from employees
+where salary<8000;
+
+SELECT salary from employees
+where department_id=80
+minus  --차집합 : 정렬됨
+SELECT salary from employees
+where salary<8000;
+
+--commition_pct가 있는 email, department_id 출력, 급여가 9000 이상은 제외
+select email, department_id from employees
+where commission_pct is not null and department_id=80
+minus
+select email, department_id from employees
+where salary >= 9000;
+
+select email aaa, salary aab from employees
+where employee_id=100
+union all --위를 기준으로 출력된다
+select email bba, salary bbb from employees
+where employee_id=101
+ORDER BY 2, 1; --앞 숫자 번째 컬럼을 기준으로 정렬하는데 값이 같으면 뒤 숫자 번째 컬럼 기준으로 다시 정렬 
+
+select employee_id, salary, department_id 
+from employees
+where department_id in(50, 80)
+order by 3, 1, 2; --모든 컬럼을 정렬가능 우선 순위가 다를 뿐
