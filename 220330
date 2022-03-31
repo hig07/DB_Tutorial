@@ -1,0 +1,86 @@
+CREATE TABLE EMP 
+(
+  EMPNO VARCHAR2(6) primary key --primary key에 not null 내장되어 있음
+, EMPNM VARCHAR2(40) NOT NULL 
+, JUMINNO VARCHAR2(13) 
+, DEPTNO VARCHAR2(2) NOT NULL 
+, HREDATE DATE DEFAULT sysdate NOT NULL 
+--, CONSTRAINT EMP_PK PRIMARY KEY 
+--  (
+--    EMPNO 
+--  )
+--  ENABLE 
+);
+
+insert into emp(EMPNO, EMPNM, JUMINNO, DEPTNO, HREDATE)
+values('1', '이름', '1234567890123', '20', sysdate);
+
+insert into emp(EMPNM, EMPNO, JUMINNO, HREDATE, DEPTNO)
+values('이름2', '2', '1234567890123', sysdate, '20');
+
+insert into emp
+values('3', '이름3', '1234567890123', '20', sysdate);
+
+insert into emp
+values('4', '이름4', null, '30', sysdate);
+
+insert into emp
+values('5', '이름5', null, '40', null);
+
+insert into emp(EMPNO, EMPNM, DEPTNO)
+values('6', '이름6', '20');  --default 반영
+
+--어떤 column을 null불가에서 null 가능으로 바꾸려면 만들어놓은 해당 column 중에 null이 있으면 안된다
+insert into emp(EMPNO, EMPNM, DEPTNO)
+values('7', '이름7', '20');  --default 반영
+
+--delete emp where empno='5';
+
+select * from emp;
+show user;
+
+--------------------------------------------------------------
+
+create table aaa(
+    name1 varchar2(3 BYTE),
+    name2 varchar2(3 char)
+);
+insert into aaa values('가나', '가나다');
+select * from aaa;
+delete aaa;
+rollback;  --커밋 이전의 데이터를 복구시켜준다
+
+truncate table aaa;
+--------------------------------------------------------------
+create table ddd(
+    num number(2, 3) --(정밀도, 스케일)-> 2가 전체 자리수가 아니다 
+    --소수점 밑에서 첫 1이상의 숫자가 나오고 2자리까지 판단 후 버림
+    --소수점 4번째에서 반올림 후 3번째 자리까지 입력
+);
+
+insert into ddd values(0.00123456); --0.001
+insert into ddd values(0.09874564); --0.099
+insert into ddd values(0.00009874564); --0
+insert into ddd values(0.0009874564); --0.001
+
+select * from ddd;
+--timestamp를 활용하면 커밋 이후에도 데이터를 복구할 수 있다
+--------------------------------------------------------------
+alter table EMP2 
+add constraint email_uk unique("EMAIL");
+insert into emp2
+values(1, 'a@a.com');
+--insert into emp2
+--values(2, 'a@a.com');  unique로 인한 무결성 제약 조건 위배
+select * from EMP2;
+--------------------------------------------------------------
+alter table EMP 
+add constraint emp_dept_fk 
+foreign key("DEPTNO") 
+references "DEPT"("DEPTNO");
+--부모가 DEPT 자식이 EMP, 따라서 부모에 pk(DEPTNO)가 설정이 안되어있으면 행 추가 불가
+insert into emp
+values(8, 'test', null, '40', sysdate);
+select * from EMP;
+
+
