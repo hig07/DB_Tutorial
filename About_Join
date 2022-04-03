@@ -180,7 +180,31 @@ where e.department_id(+)=d.department_id;
 -----------------------------------------------------------------
 --departments / employees 대상
 --1. 80번 부서의 사원번호,이메일,부서명을 출력하세요.
+select e.employee_id, e.email, d.department_name
+from employees e join departments d
+on d.department_id=80
+order by e.employee_id;
+
 --2. 부서가 존재하지 않는 사원번호,이메일출력하세요.
+select employee_id, email
+from employees
+where department_id is null;
+
 --3. 전체 사원의 사원번호,이메일,부서명을 출력하세요.
+select e.employee_id, e.email, d.department_name
+from employees e left join departments d
+on e.department_id=d.department_id
+order by e.employee_id;
+
 --4. 20,40,60번 부서 사원의 사원번호,이메일,부서명을 출력하세요.
+select e.employee_id, e.email, d.department_name
+from employees e inner join departments d
+on e.department_id=d.department_id
+and e.department_id in(20, 40, 60)
+order by e.employee_id;
+
 --5. 전체사원의 사원번호,매니져명,부서명을 출력하세요.
+select e.employee_id, e.manager_id, d.department_name
+from employees e left join departments d
+on e.department_id=d.department_id
+order by e.employee_id;
