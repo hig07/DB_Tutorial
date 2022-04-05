@@ -40,6 +40,22 @@ select * from emp;
 show user;
 
 --------------------------------------------------------------
+--table 명은 board
+--1. 컬럼명을 명시하고 no가 1인 데이터를 참고하여 데이터를 삽입하세요.
+insert into board(no, subject, content, writer) 
+values(1, '제목01', '내용01', '작성자01');
+--2. 컬럼명을 명시하고 no가 2인 데이터를 참고하여 데이터를 삽입하세요.
+insert into board(no, subject, content, writer) 
+values(2, '제목02', '내용02', '작성자02');
+--3. 컬럼명을 명시하고(null은 제외) no가 3인 데이터를 참고하여 데이터를 삽입하세요.
+insert into board(no, subject, content, writer) 
+values(3, '제목03', '내용03', null);
+--update set 수정
+update board set content='내용03수정', subject='제목03수정';
+select * from board;
+delete from board; --모두 삭제, 틀은 유지
+truncate table board; --DML언어이고 복구 불가능, 자동 커밋, truncate는 안쓰는 것이 안전**********
+--------------------------------------------------------------
 
 create table aaa(
     name1 varchar2(3 BYTE),
