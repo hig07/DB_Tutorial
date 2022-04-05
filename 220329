@@ -8,6 +8,7 @@ create user nowon IDENTIFIED BY 1234;
 --나열식으로 권한 부여 가능
 GRANT connect, resource to nowon;
 grant unlimited tablespace to nowon;
+--tablespace 권한 부여에 대해 간략히 훑어보기
 --계정 삭제
 drop user c##test;
 
