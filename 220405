@@ -1,1 +1,233 @@
 
+--distinct 중복값 제거
+select distinct department_id from employees;
+--------------------------------------------------------------------------------
+select * from SYS.user_sys_privs;
+select * from SYS.user_role_privs;
+--------------------------------------------------------------------------------
+select email, salary from employees
+where salary > 10000
+order by 2;
+
+select avg(salary) from employees;
+--합치면
+select email, salary from employees
+where salary > (select avg(salary) from employees)
+order by 2;
+--------------------------------------------------------------------------------
+--email이 'JKING'인 사원의 급여보다 더 많이 받는 사람의 이메일, 급여는?
+select email, salary from employees
+where salary > (select salary 
+                from employees 
+                where email='JKING')
+--서브쿼리 안에는 왠만하면 order by 쓰지마
+order by 2;
+--------------------------------------------------------------------------------
+CREATE VIEW EMP
+AS SELECT 
+    EMPLOYEE_ID emp_id,
+    FIRST_NAME||' '||LAST_NAME name,
+    email,
+    salary,
+    department_id dept_id
+FROM employees; --view 생성
+
+select * from emp;
+
+drop view emp;
+--------------------------------------------------------------------------------
+--단일행 서브쿼리(single row) (비교연산자 !=, <> 의미가 같음)
+--실행 결과의 행이 1개인 경우
+--80번 부서의 이메일, 급여, 부서 번호 출력
+select e.email, e.salary, e.department_id, d.department_name
+from employees e JOIN departments d
+on e.department_id=d.department_id;
+
+--email이 'SKING'인 사원의 부서와 같은 사원의
+--email, salary, department_id, department_name 출력
+select e.email, e.salary, e.department_id, d.department_name
+from employees e JOIN departments d
+on e.department_id=d.department_id
+where e.department_id=
+        (select department_id 
+         from employees
+         where email='SKING');
+
+--email이 'TFOX'의 입사일보다 이후에 입사한 사원의 email, hire_date 명단 출력
+select email, hire_date from employees
+where hire_date > (
+    SELECT hire_date 
+    from employees 
+    where email='TFOX')
+order by 2;
+
+--부서명이 'IT' 사원의 employee_id, email, department_id 출력
+SELECT employee_id, email, department_id
+from employees
+where department_id = ( --join없이 비교 가능
+    select department_id 
+    from departments 
+    where department_name='IT');
+--------------------------------------------------------------------------------
+--다중행 서브쿼리(multi row)
+--연산자 유의
+--in(다중행 결과)
+--all(다중행 결과) : 모두 만족해야한다
+--any(다중행 결과) : 하나라도 만족하는 것
+-- < ALL() : 다중행 결과의 최소값보다 작은 경우
+-- < ANY() : 다중행 결과의 최대값보다 작은 경우
+--60번 부서 사원들의 급여보다 적게 받는 사원들의 이메일과 급여 부서번호 출력(최소값보다 작은 값)
+select email, salary, department_id from employees
+where salary < all(9000, 4800, 4200, 6000, 4800)
+order by 2;
+--위아래 같음
+select email, salary, department_id from employees
+where salary < all(
+    select salary 
+    from employees
+    where department_id=60)
+order by 2;
+
+select email, salary, department_id from employees
+where salary < any(
+    select salary 
+    from employees
+    where department_id=60)
+order by 2;
+
+--전체 사원 중 job_id가 'FI_ACCOUNT'인 사원의 최소 연봉자보다 높은 사원의 email, job_id, salary
+select email, job_id, salary from employees
+where salary > any(
+    select salary 
+    from employees 
+    where job_id='FI_ACCOUNT')
+order by 3;
+
+select e.email, e.department_id, d.location_id
+from employees e join departments d
+on e.department_id=d.department_id
+where e.department_id = (
+    select department_id
+    from departments
+    where department_name='IT');
+    
+--employees 테이블을 조사하여 전체 사원 중 부서가 50번 부서에 입사한 사람보다 늦게 입사한 사원
+--email, hire_date, department_id
+select e.email, e.hire_date, e.department_id, d.department_name
+from employees e join departments d
+on e.department_id=d.department_id
+where e.hire_date > all(
+    select hire_date 
+    from employees 
+    where department_id=50)
+order by 2;
+
+-- (not) exists : 쿼리 존재유무에 따라 true, false 리턴
+select email, salary, department_id
+from employees
+where salary > 10000
+and exists(
+    select department_id 
+    from departments 
+    where department_name='IT');
+--------------------------------------------------------------------------------
+--다중 컬럼(multi column)
+--서브 쿼리의 실행 결과가 여러 컬럼을 반환한다.
+--메인 쿼리의 조건절에서 여러 컬럼을 동시에 비교 가능합니다.
+--비교 컬럼의 개수, 순서가 동일해야한다
+select * from employees
+where salary > (select avg(salary) from employees);
+
+select '', avg(salary) from employees;
+
+select department_id, avg(salary) from employees
+group by department_id;
+
+--부서별 최대 급여
+select department_id, max(salary) from employees
+group by department_id;
+
+select employee_id, email, department_id, salary
+from employees
+where (department_id, salary) 
+    in (
+        select department_id, max(salary) 
+        from employees
+        group by department_id)
+order by 3;
+
+--부서별 제일 마지막에 입사한 사원의 명단
+select email, department_id, hire_date
+from employees
+where (department_id, hire_date) 
+    in (
+        select department_id, max(hire_date) 
+        from employees
+        group by department_id)
+order by 2;
+
+--80번 부서의 최대 급여를 받는 사원
+select email, salary, department_id
+from employees
+where (department_id, salary) 
+    in (
+        select department_id, max(salary) 
+        from employees        
+        group by department_id
+        having department_id=80
+        );
+
+--job_id 별로 해당 잠에서 최대 연봉을 받는 사원
+select email, job_id, salary
+from employees
+where (job_id, salary) 
+    in (
+        select job_id, max(salary) 
+        from employees
+        group by job_id)
+order by 2;
+--------------------------------------------------------------------------------
+--상호 연관 서브쿼리
+--join
+--전체 사원 중 자신의 부서의 평균 연봉과 같거나 많은 사람
+--반복문과 비슷
+select email, salary, department_id 
+from employees e1
+where salary >= (
+    select avg(salary) 
+    from employees e2
+    where e1.department_id=e2.department_id
+    )
+order by 3, 2;
+--메인 쿼리와 서브 쿼리의 연관
+--------------------------------------------------------------------------------
+--서브쿼리에 대한 설명으로 올바른 것은? -> 1, 2, 4
+--1. 서브쿼리는 단일 행 또는 복수 행 비교 연산자와 함께 사용할 수 있다. O
+--2. 서브쿼리는 select 절, from 절, having 절, order by 절 등에서 사용 가능하다. O
+--3. 서브쿼리의 결과가 복수 행 결과를 반환하는 경우에는 =, <=, >= 등 연산자와 함께 사용이 가능하다. X (불가능)
+--4. 연관(correlated) 서브쿼리는 서브쿼리가 메인쿼리 컬럼을 포함하고 있는 형태의 서브쿼리이다. O
+--5. 다중 컬럼 서브쿼리는 서브쿼리의 결과로 여러 개의 컬럼이 반환되어 O
+--메인 쿼리의 조건과 동시에 비교되는 것을 의미하며 O
+--oracle 및 sql server(MSSQL) 등의 DBMS에서 사용할 수 있다. X (DBMS마다 다름)
+
+--서브쿼리에 대한 설명으로 가장 적절한 것은? -> 2
+--1. 단일 행 서브쿼리는 서브쿼리의 실행 결과가 항상 1건 이하인 서브쿼리 연산자로 in, all 등의 연산자를 사용한다. X
+--2. 다중 행 서브쿼리 비교 연산자는 단일 행 서브쿼리의 비교 연산자도 사용할 수 있다. O (단일 행은 다중 행에 포함되어 있기 때문)
+--3. 연관 서브쿼리는 주로 메인쿼리에 값을 제공하기 위한 목적으로 사용한다. X (비연관 서브쿼리에 대한 설명)
+--4. 서브쿼리는 항상 메인쿼리에서 읽혀진 데이터에 대해 서브쿼리에서 해당 조건이 만족하는지를 확인하는 방식으로 수행된다. X (비연관 서브쿼리에 대한 설명)
+
+--SELECT B.사원번호, B.사원명, A.부서번호, A.부서명
+--,(SELECT COUNT(*) FROM 부양가족 Y WHERE Y.사원번호=B.사원번호) AS 부양가족수
+--FROM 부서 A, (SELECT * FROM 사원 WHERE 입사년도='2014') B
+--WHERE A.부서번호=B.부서번호
+--AND EXISTS(SELECT 1 FROM 사원 X WHERE X.부서번호=A.부서번호);
+--1. 위 SQL에는 다중행 서브쿼리, 단일행 연관 서브쿼리, INLINE VIEW가 사용되었다. O
+--(SELECT COUNT(*) FROM 부양가족 Y WHERE Y.사원번호=B.사원번호) : 스칼라 서브쿼리, 단일행 연관 서브쿼리
+--(SELECT * FROM 사원 WHERE 입사년도='2014') B : 인라인 뷰 서브쿼리
+--EXISTS(SELECT 1 FROM 사원 X WHERE X.부서번호=A.부서번호) : 다중행 서브쿼리 (EXISTS 때문)
+--2. SELECT절에 사용된 서브쿼리는 스칼라 서브쿼리라고도 하며, 이러한 형태의 서브쿼리는 JOIN으로 동일한 결과를 추출할 수도 있다. O
+--3. WHERE절의 서브쿼리에 사원 테이블 검색 조건으로 입사년도 조건을 FROM절의 서브쿼리와 동일하게 추가해야 원하는 결과를 추출할 수 있다. X
+--4. FROM절의 서브쿼리는 동적 뷰라고도 하며, SQL 문장 중 테이블 명이 올 수 있는 곳에서 사용할 수 있다. O
+--------------------------------------------------------------------------------
+
+
