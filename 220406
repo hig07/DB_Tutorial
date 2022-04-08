@@ -1,0 +1,42 @@
+select email, department_name
+from employees e, departments d
+where e.department_id=d.department_id;
+--------------------------------------------------------------------------------
+--스칼라 서브쿼리
+--다중 for문이라고 생각하면 된다.
+--서브쿼리명은 알리아스로 변경해주면 좋다
+--select 절에 들어가는 서브쿼리, 결과는 하나씩
+--조인이 좀 더 빠르다
+select email, department_name
+from employees e, departments d
+where e.department_id=d.department_id(+); --outer join
+--위아래가 같음
+SELECT e.email, (
+    select department_name 
+    from departments d
+    where e.department_id=d.department_id) dname
+from employees e;
+--------------------------------------------------------------------------------
+--인라인 뷰 서브쿼리
+--인라인 뷰 : 재활용된 뷰
+--동적 view 생성하는 서브쿼리
+--from절에 활용
+--nowon.sql 참조
+
+--최근 입사한 입사일 기준으로 3~4번째 입사자 명단
+select email, hire_date, department_id
+from (
+    select rownum rnum, e.* 
+    from (
+        select email, hire_date, department_id 
+        from employees
+        order by hire_date desc) e)
+where rnum between 10 and 15;
+--------------------------------------------------------------------------------
+select email, hire_date, department_id, 
+        (select count(*) 
+        from employees sub
+        where sub.department_id=main.department_id) 부서원수
+from employees main
+order by department_id;
+
