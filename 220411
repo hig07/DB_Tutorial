@@ -1,0 +1,121 @@
+              review and procedure
+--------------------------------------------------------------------------------
+create TABLE test(
+    no number PRIMARY key,
+    name VARCHAR2(255) not null,
+    created_date TIMESTAMP
+);
+--------------------------------------------------------------------------------
+delete from test where no=2;
+
+drop table test;
+drop SEQUENCE seq_test;
+
+insert into test
+VALUES(seq_test.nextval, 'CCC', sysdate);
+
+insert into test(no, name, created_date)
+VALUES(2, 'AAA', SYSTIMESTAMP);
+
+create SEQUENCE seq_test
+INCREMENT by 1 start with 1;
+
+select seq_test.currval from dual;
+SELECT * FROM test;
+    
+rollback;
+--------------------------------------------------------------------------------
+update test set name='BBB' where no=1;
+
+update test set name='CCC', created_date=SYSTIMESTAMP 
+where no=15;
+
+commit;
+--------------------------------------------------------------------------------
+alter table test
+add email VARCHAR2(255);
+
+alter table test
+DROP column email;
+
+ALTER TABLE TEST
+MODIFY NAME NUMBER;
+
+DESC TEST;
+
+ALTER TABLE TEST
+rename column no to MNO;
+--------------------------------------------------------------------------------
+create view test_view
+as
+select * from test;
+
+create view test_copy
+as
+select * from test_view
+with READ ONLY;
+delete test_copy where no=21; --읽기전용은 select만 가능
+
+
+drop view test_copy;
+--------------------------------------------------------------------------------
+select * from coffee;
+select * from total;
+
+insert into coffee
+values(seq_coffee.nextval, '라떼', 2500, systimestamp);
+
+select sum(price) 매출합계 from coffee;
+select avg(price) 평단 from coffee;
+
+insert into total 
+values(
+    sysdate, 
+    (select sum(price) from coffee),
+    (select avg(price) from coffee)
+);
+--------------------------------------------------------------------------------
+--절차형 sql
+--프로시저, 함수, 트리거
+EXECUTE proc_tot();
+
+truncate table total;
+truncate table coffee;
+
+alter table total
+modify day date;
+desc total;
+--------------------------------------------------------------------------------
+--시간 자르기 : trunc(sysdate)
+select sysdate from dual;
+select 
+trunc(sysdate),
+trunc(sysdate, 'DD'),
+trunc(sysdate, 'MM'), 
+trunc(sysdate, 'YEAR')
+from dual;
+
+insert into coffee 
+values(SEQ_COFFEE.nextval, '아메리카노', 1900, trunc(sysdate));
+select * from coffee;
+select * from total;
+--------------------------------------------------------------------------------
+select count(day) from total
+where day >= trunc(sysdate);
+
+update total 
+set tot=40200, avg=2010
+where trunc(day)=trunc(sysdate);
+--------------------------------------------------------------------------------
+--예제
+select * from coffee;
+select * from total;
+
+insert into coffee 
+values(SEQ_COFFEE.nextval, '아메리카노', 2000, trunc(sysdate));
+
+EXECUTE proc_tot_select('22/04/11');
+
+select sum(price) 매출합계 from coffee;
+select avg(price) 평단 from coffee;
+select * from total;
