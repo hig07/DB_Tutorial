@@ -1,0 +1,30 @@
+CREATE OR REPLACE PROCEDURE PROC_TOT AS 
+v_tot number;
+v_avg number;
+--oracle sql 대입연산자 ':='
+v_today coffee.cdate%type:=trunc(sysdate); --coffee 테이블의 cdate 타입
+v_count number:=0; --초기값이 0
+BEGIN
+  --매출합계  
+  select sum(price) into v_tot from coffee
+  where cdate >= v_today;
+  --평단  
+  select avg(price) into v_avg from coffee
+  where cdate >= v_today;
+  --count 확인
+  select count(day) into v_count from total
+  where day >= trunc(sysdate);
+  --total 테이블에 삽입
+  if v_count = 0 then
+    insert into total(day, tot, avg)
+    values(v_today, v_tot, v_avg);
+  else
+  --update
+    update total 
+    set tot=v_tot, avg=v_avg
+    where day=v_today;
+  end if;
+  
+  commit;
+  
+END PROC_TOT;
