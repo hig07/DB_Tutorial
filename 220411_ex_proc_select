@@ -1,0 +1,29 @@
+CREATE OR REPLACE 
+PROCEDURE PROC_TOT_SELECT ( P_DATE IN total.day%TYPE )
+AS 
+v_tot total.tot%TYPE;
+v_avg total.avg%TYPE;
+v_count number:=0;
+
+BEGIN
+    select sum(price) into v_tot from coffee
+    where cdate=P_DATE;
+    
+    select avg(price) into v_avg from coffee
+    where cdate=P_DATE;
+    
+    select count(day) into v_count from total
+    where day=P_DATE;
+    
+    if v_count=0 then
+        insert into total values(
+        P_DATE, v_tot, v_avg);
+    else
+        update total
+        set tot=v_tot, avg=v_avg
+        where day=P_DATE;
+    end if
+        ;
+        
+    commit;
+END PROC_TOT_SELECT;
