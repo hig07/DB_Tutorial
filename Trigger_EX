@@ -1,0 +1,63 @@
+CREATE OR REPLACE TRIGGER TRIG_TOT 
+after INSERT ON coffee
+declare
+v_tot number;
+v_avg number;
+v_count number:=0;
+
+BEGIN
+    select sum(price), avg(price)
+    into v_tot, v_avg
+    from coffee
+    where trunc(cdate)=trunc(sysdate);
+    
+    select count(day) into v_count
+    from total
+    where trunc(day)=trunc(sysdate);
+    
+    if v_count=0 then
+        insert into total
+        values(v_tot, v_avg, sysdate);
+    else
+        update total
+        set tot=v_tot, avg=v_avg, day=sysdate
+        where trunc(day)=trunc(sysdate);
+    end if;
+    
+END;
+--------------------------------------------------------------------------------
+CREATE OR REPLACE TRIGGER TRIG_DEL 
+AFTER DELETE ON COFFEE 
+declare
+v_tot number;
+v_avg number;
+
+BEGIN
+    select sum(price), avg(price)
+    into v_tot, v_avg
+    from coffee
+    where trunc(cdate)=trunc(sysdate);
+    
+    update total
+    set tot=v_tot, avg=v_avg, day=sysdate
+    where trunc(day)=trunc(sysdate);
+    
+END;
+--------------------------------------------------------------------------------
+CREATE OR REPLACE TRIGGER TRIG_UPDATE 
+AFTER UPDATE OF PRICE ON COFFEE 
+declare
+v_tot number;
+v_avg number;
+
+BEGIN    
+    select sum(price), avg(price)
+    into v_tot, v_avg
+    from coffee
+    where trunc(cdate)=trunc(sysdate);
+    
+    update total
+    set tot=v_tot, avg=v_avg, day=sysdate
+    where trunc(day)=trunc(sysdate);
+    
+END;
