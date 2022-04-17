@@ -1,1 +1,13 @@
-DataBase Connection Pool
+JDBC : Java DataBase Connectivity
+  자바에서 데이터베이스에 연결하기 위한 인터페이스
+  JDBC는 이 Driver를 통해 DB에 접속
+
+DBCP : DataBase Connection Pool
+  DB와 커넥션을 맺고 있는 객체를 관리하는 역할 -> 효율  
+  WAS 실행 시 미리 일정량의 DB Connection 객체를 생성하고 Pool 이라는 공간에 저장,
+  그리고 DB 연결 요청이 있으면, 이 Pool 이라는 공간에서 Connection 객체를 가져다 쓰고 반환
+
+여러 개의 DB Connection을 하나의 Pool에 모아놓고 관리
+DB 커넥션 객체를 여러 개 생성한 뒤 Pool에 담아놓고 필요할 때 불러와서 사용
+만약, 빌려줄 수 있는 Connection이 없다면 Connection 객체가 반환할 때 까지 클라이언트는 대기 상태로 전환
+사용이 끝난 커넥션 객체는 다른 작업에서 다시 사용할 수 있도록 Pool에 반환
